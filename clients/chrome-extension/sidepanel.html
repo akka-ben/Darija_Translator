@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darija Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Animated background overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin: 16px;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== Header ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 6px;
+            text-align: center;
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .flag {
+            font-size: 32px;
+            display: inline-block;
+            margin-right: 8px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        /* ===== Info Banner ===== */
+        .info-banner {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 2px solid #90caf9;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-banner::before {
+            content: 'ℹ';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #1976d2;
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        /* ===== Form Group ===== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 110px;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+            font-family: inherit;
+            color: #333;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #bbb;
+        }
+
+        /* ===== Character Counter ===== */
+        .char-counter {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+            text-align: right;
+            transition: color 0.3s ease;
+        }
+
+        /* ===== Button Groups ===== */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .button-group.full {
+            grid-template-columns: 1fr;
+        }
+        
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        /* ===== Primary Button ===== */
+        .btn-primary {
+            margin-top: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        /* ===== Secondary Button ===== */
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ===== Voice Button ===== */
+        .btn-voice {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        
+        .btn-voice:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-voice.recording {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            animation: pulse 1s infinite;
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* ===== Speech Synthesis Buttons ===== */
+        .btn-speak {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+        }
+
+        .btn-speak:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+            color: white;
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc !important;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .icon {
+            font-size: 18px;
+        }
+
+        /* ===== Result Box ===== */
+        .result {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7ff 0%, #f0f3ff 100%);
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            display: none;
+            animation: slideInUp 0.5s ease-out;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            border: 2px solid #e8ecff;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result h3::before {
+            content: '✓';
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            color: #fff;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .result p {
+            margin: 10px 0;
+            color: #333;
+            line-height: 1.6;
+            word-break: break-word;
+            font-size: 14px;
+        }
+        
+        .result strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* ===== Error State ===== */
+        .result.error {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcccb 100%);
+            border-left-color: #f44336;
+            border-color: #ff6b6b;
+        }
+        
+        .result.error h3 {
+            color: #c62828;
+        }
+
+        .result.error h3::before {
+            content: '⚠';
+            background: #f44336;
+        }
+
+        /* ===== Loading State ===== */
+        .loading {
+            text-align: center;
+            color: #667eea;
+            padding: 20px 10px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ===== TTS Controls ===== */
+        .tts-controls {
+            display: none;
+            gap: 12px;
+            margin-top: 12px;
+            padding: 12px;
+            background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%);
+            border-radius: 12px;
+            border: 2px solid #ffe0b2;
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        .tts-controls.show {
+            display: flex;
+        }
+
+        .tts-controls button {
+            flex: 1;
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        /* ===== Copy Button ===== */
+        .copy-btn {
+            width: auto;
+            padding: 8px 14px;
+            font-size: 12px;
+            margin-top: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ===== Content Sections ===== */
+        .input-section {
+            flex-grow: 0;
+        }
+
+        .result-section {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 480px) {
+            .container {
+                margin: 8px;
+                padding: 20px;
+                min-height: calc(100vh - 16px);
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            textarea {
+                height: 100px;
+            }
+
+            button {
+                font-size: 13px;
+                padding: 11px;
+            }
+
+            .icon {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-section">
+            <div class="header">
+                <h2>Darija Translator</h2>
+                <p class="subtitle">English to Moroccan Arabic</p>
+            </div>
+
+            <div class="info-banner">
+                Translate instantly with voice input and text-to-speech
+            </div>
+            
+            <div class="form-group">
+                <label for="inputText">English Text</label>
+                <div class="textarea-wrapper">
+                    <textarea id="inputText" placeholder="Type, paste, or speak English text..." autocomplete="off"></textarea>
+                    <div class="char-counter">
+                        <span id="charCount">0</span> characters
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="voiceBtn" class="btn-voice" title="Speak to translate">
+                    Voice
+                </button>
+                <button id="pasteBtn" class="btn-secondary" title="Paste from clipboard">
+                    <span class="icon"></span> Paste
+                </button>
+            </div>
+            
+            <button id="translateBtn" class="btn-primary">
+                <span class="icon">✨</span> Translate to Darija
+            </button>
+        </div>
+
+        <div class="result-section">
+            <div id="result" class="result"></div>
+            
+            <div id="ttsControls" class="tts-controls">
+                <button id="speakBtn" class="btn-speak">
+                    <span class="icon"></span> Listen
+                </button>
+                <button id="stopBtn" class="btn-stop">
+                    <span class="icon"></span> Stop
+                </button>
+            </div>
+
+            <div class="footer">
+                Darija Translator • Chrome Extension
+            </div>
+        </div>
+    </div>
+    
+    <script src="sidepanel.js"></script>
+</body>
+</html>

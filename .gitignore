@@ -1,0 +1,12 @@
+# Maven
+target/
+*.war
+
+# Payara
+payara-micro.jar
+
+# Logs
+*.log
+
+# OS
+.DS_Store
