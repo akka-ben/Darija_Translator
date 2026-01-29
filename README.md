@@ -12,7 +12,7 @@ This project was developed as a Master-level academic project, with a strong foc
 
 👉 **Watch the full live demo of the project here:**
 
-[![Darija Translator Demo](https://img.youtube.com/vi/A7HMsDoc5dI/maxresdefault.jpg)](https://youtu.be/A7HMsDoc5dI)
+[![Darija Translator Demo](./docs/images/video-thumbnail.png)](https://youtu.be/A7HMsDoc5dI)
 
 **This video demonstrates:**
 - the REST API running on Payara Micro
